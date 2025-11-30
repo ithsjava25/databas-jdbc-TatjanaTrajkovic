@@ -19,15 +19,14 @@ public class Main {
         String dbUser = resolveConfig("APP_DB_USER", "APP_DB_USER");
         String dbPass = resolveConfig("APP_DB_PASS", "APP_DB_PASS");
 
-        Scanner sc = new Scanner(System.in);
-
         if (jdbcUrl == null || dbUser == null || dbPass == null) {
             throw new IllegalStateException(
                     "Missing DB configuration. Provide APP_JDBC_URL, APP_DB_USER, APP_DB_PASS " +
                             "as system properties (-Dkey=value) or environment variables.");
         }
 
-        try (Connection connection = DriverManager.getConnection(jdbcUrl, dbUser, dbPass)) {
+        try (Scanner sc = new Scanner(System.in);
+             Connection connection = DriverManager.getConnection(jdbcUrl, dbUser, dbPass)) {
             if(!loginHandler(connection, sc)){
                 return;
             }
@@ -226,7 +225,14 @@ public class Main {
 
     public void updateAccount(Connection connection, Scanner sc) throws SQLException{
         System.out.println("User id:");
-        int userId = Integer.parseInt(sc.nextLine().trim());
+        int userId;
+        try {
+            userId = Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a valid user ID.");
+            return;
+        }
+
         System.out.println("New password: ");
         String newPassword = sc.nextLine().trim();
 
@@ -246,8 +252,15 @@ public class Main {
     }
 
     private void deleteAccount(Connection connection, Scanner sc) throws SQLException{
-        System.out.println("User id: ");
-        int userId = Integer.parseInt(sc.nextLine().trim());
+        System.out.println("User id:");
+        int userId;
+        try {
+            userId = Integer.parseInt(sc.nextLine().trim());
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input. Please enter a valid user ID.");
+            return;
+        }
+
 
         String sql = """
                 DELETE FROM account
